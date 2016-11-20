@@ -22,7 +22,7 @@
                     <dt>{{ point.lat }}, {{ point.long }}</dt>
                     <dd class="pos-right clearfix">
                         <div class="circ"></div>
-                        <div class="time">{{ point.time }}</div>
+                        <div class="time"></div>
                         <div class="events">
                             <div class="events-body">
                                 <h4 class="events-heading">Number of hotels:</h4>
@@ -50,7 +50,6 @@
     var locations = [];
     for (i = 0; i < hotels.length; i++) {
         locations.push([hotels[i][1], hotels[i][2], hotels[i][3]])
-        console.log(locations[i])
     }
 
     var map = new google.maps.Map(document.getElementById('map'), {
