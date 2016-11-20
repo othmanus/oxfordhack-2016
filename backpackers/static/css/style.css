@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css?family=Lato');
+
+body, .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+    font-family: 'Lato' !important;
+}
+
+h1.cover-heading {
+    font-size: 60px;
+}
+p.lead {
+    margin-bottom: 50px;
+    font-size: 2em;
+}
+
+.control-label {
+    font-size: 1.4em;
+}
+
+.form-control {
+    border-radius: 0;
+    height: 50px;
+    color: #1EB0A0;
+    font-size: 1.4em;
+}
+
+.btn#search {
+
+    display: block;
+    margin: 20px auto;
+    border-radius: 0;
+    width: 300px;
+}

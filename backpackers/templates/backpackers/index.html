@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <div class="site-wrapper">
+        <div class="site-wrapper-inner">
+            <div class="cover-container">
+
+                <div class="masthead clearfix">
+                    <div class="inner">
+                        <h3 class="masthead-brand">Bag'packers</h3>
+                        <nav>
+                            <ul class="nav masthead-nav">
+                                <li class="active"><a href="#">Home</a></li>
+                                <li><a href="#">Team</a></li>
+                                <li><a href="#">Contact</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+
+                <div class="inner cover">
+                    <h1 class="cover-heading">Enjoy your trip</h1>
+                    <p class="lead">Choose your destination, we organize your stays.</p>
+                </div>
+
+                <form action="{% url 'search' %}" method="get">
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <label class="control-label" for="origin">Departure</label>
+                            <input type="text" name="origin" id="origin" class="form-control" placeholder="Choose your departure">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label" for="destination">Destination</label>
+                            <input type="text" name="destination" id="destination" class="form-control" placeholder="Choose your destination">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label" for="date">Departure date</label>
+                            <input type="text" name="date" id="date" class="form-control" placeholder="yyyy-mm-dd">
+                        </div>
+
+                        <div class="form-group col-md-offset-1 col-md-4">
+                            <label class="control-label" for="mode">Mode of travel</label>
+                            <select class="form-control" name="mode" id="mode">
+                                <option value="driving">Car</option>
+                                <option value="walking">Walking / Cycle</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label class="control-label" for="criteria">Criteria</label>
+                            <div class="form-inline">
+                                <input type="text" name="interval" id="interval" class="form-control" placeholder="Search by">
+
+                                    <select class="form-control" name="criteria" id="criteria">
+                                        <option value="distance">Km</option>
+                                        <option value="time">Hours</option>
+                                    </select>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <button type="submit" id="search" class="btn btn-lg btn-success">Search</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="mastfoot">
+                    <div class="inner">
+                        <p>Hacked with <3 at <a href="http://www.oxfordhack.com">Oxford Hackathon</a></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+{% endblock %}
