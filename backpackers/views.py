@@ -48,6 +48,9 @@ def search(request):
     waypoints = []
     waypointCoords = []
 
+    nbStepsByDistance = 0
+    nbStepsByTime = 0
+
     # if they want to split by distance
     if intervalType == "distance":
         distanceFromWaypoint = 0
@@ -60,7 +63,8 @@ def search(request):
             distanceFromWaypoint += jsonOfRes[u'routes'][0][u'legs'][0][u'steps'][step][u'distance'][u'value']
 
             if distanceFromWaypoint >= distanceInterval:
-                waypoints.append(jsonOfRes[u'routes'][0][u'legs'][0][u'steps'][step])
+                waypoints.append(jsonOfRes[u'routes'][0][u'legs'][0][u'steps'][step+1])
+                nbStepsByDistance = distanceFromWaypoint
                 distanceFromWaypoint = 0
 
     # if they want to split by time
@@ -75,7 +79,8 @@ def search(request):
             timeFromWaypoint += jsonOfRes[u'routes'][0][u'legs'][0][u'steps'][step][u'duration'][u'value']
 
             if timeFromWaypoint >= timeInterval:
-                waypoints.append(jsonOfRes[u'routes'][0][u'legs'][0][u'steps'][step])
+                waypoints.append(jsonOfRes[u'routes'][0][u'legs'][0][u'steps'][step+1])
+                nbStepsByTime = timeFromWaypoint
                 timeFromWaypoint = 0
 
     # store coordinates of each waypoint
@@ -83,8 +88,10 @@ def search(request):
         coordinates = {} #to hold latitude and longitude
         coordinates['lat'] = waypoints[point][u'start_location'][u'lat']
         coordinates['long'] = waypoints[point][u'start_location'][u'lng']
-        coordinates['time'] = waypoints[point][u'duration'][u'value']
+        coordinates['time'] = (nbStepsByDistance if intervalType == "distance" else nbStepsByTime)
         waypointCoords.append(coordinates)
+        nbStepsByDistance = 0
+        nbStepsByTime = 0
 
     # convert coordinates to json
     jsonCoords = json.dumps({"waypoints":waypointCoords})
@@ -164,10 +171,13 @@ def search(request):
     # hotels = {}
 
     hotels = []
+    stops = []
 
     for point in range(len(parsedWaypoints)):
         lat = ("%.2f" % parsedWaypoints[point][u'lat'])
         lng = ("%.2f" % parsedWaypoints[point][u'long'])
+
+
         entityid=lat+","+lng+"-latlong" #input("Enter Location: ")
         checkindate= depature_date
         checkoutdate= arrival_date
@@ -189,9 +199,21 @@ def search(request):
             hotel_lat = hotel['latitude']
             hotel_lng = hotel['longitude']
 
-            hotels_hash.append([hotel_id, hotel_name, hotel_lat, hotel_lng])
+            # search for cheapest price
+            hotel_prices = filt["hotels_prices"]
 
-        hotels.append(hotels_hash)
+            for price in hotel_prices:
+                id = price["id"]
+                if id == hotel_id:
+                    hotel_price = price["agent_prices"][0]["price_total"]
+                    break
+
+            hotels_hash.append([hotel_id, hotel_name, hotel_lat, hotel_lng, hotel_price])
+
+
+        stops.append([lat, lng, len(hotels_hash)])
+
+        hotels.extend(hotels_hash)
         # URL= "http://partners.api.skyscanner.net/apiservices/hotels/liveprices/v2/UK/GBP/en-GB/{}/{}/{}/{}/{}?apiKey={}&pageSize=20"
         # res = requests.get(URL.format(entityid,checkindate,checkoutdate,guests,rooms,API))
         #
@@ -223,6 +245,9 @@ def search(request):
     # ==========================================================================
     # Return the response
     # ==========================================================================
+    hotels = json.dumps(hotels)
+    stops = json.dumps(stops)
+
     context = {
         'name': 'search',
         'points': parsedWaypoints,
@@ -231,9 +256,10 @@ def search(request):
         'mode': mode,
         'criteria': intervalType,
         'interval': interval,
-        'flight_direct': flight_direct,
-        'flight_price': flight_price,
-        'flight_airlines': flight_airlines,
+        'stops': stops,
+        # 'flight_direct': flight_direct,
+        # 'flight_price': flight_price,
+        # 'flight_airlines': flight_airlines,
+        'hotels': hotels
     }
-    # return render(request, "search.html", context)
-    return HttpResponse(str(parsedWaypoints))
+    return render(request, "search.html", context)
