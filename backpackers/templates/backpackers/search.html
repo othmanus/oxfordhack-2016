@@ -19,7 +19,7 @@
             <div class="timeline">
                 <dl>
                     {% for point in points %}
-                    <dt>{{ point.lat }}, {{ point.long }}</dt>
+                    <dt data-lat="">{{ point.lat }}, {{ point.long }}</dt>
                     <dd class="pos-right clearfix">
                         <div class="circ"></div>
                         <div class="time"></div>
@@ -76,5 +76,6 @@
     function displayInfos(data) {
         alert("name : " + data.name + " - price: " + data.price)
     }
+
 </script>
 {% endblock %}

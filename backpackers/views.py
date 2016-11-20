@@ -48,9 +48,6 @@ def search(request):
     waypoints = []
     waypointCoords = []
 
-    nbStepsByDistance = 0
-    nbStepsByTime = 0
-
     # if they want to split by distance
     if intervalType == "distance":
         distanceFromWaypoint = 0
@@ -64,7 +61,6 @@ def search(request):
 
             if distanceFromWaypoint >= distanceInterval:
                 waypoints.append(jsonOfRes[u'routes'][0][u'legs'][0][u'steps'][step+1])
-                nbStepsByDistance = distanceFromWaypoint
                 distanceFromWaypoint = 0
 
     # if they want to split by time
@@ -80,7 +76,6 @@ def search(request):
 
             if timeFromWaypoint >= timeInterval:
                 waypoints.append(jsonOfRes[u'routes'][0][u'legs'][0][u'steps'][step+1])
-                nbStepsByTime = timeFromWaypoint
                 timeFromWaypoint = 0
 
     # store coordinates of each waypoint
@@ -88,10 +83,8 @@ def search(request):
         coordinates = {} #to hold latitude and longitude
         coordinates['lat'] = waypoints[point][u'start_location'][u'lat']
         coordinates['long'] = waypoints[point][u'start_location'][u'lng']
-        coordinates['time'] = (nbStepsByDistance if intervalType == "distance" else nbStepsByTime)
+        coordinates['time'] = waypoints[point][u'duration'][u'value']
         waypointCoords.append(coordinates)
-        nbStepsByDistance = 0
-        nbStepsByTime = 0
 
     # convert coordinates to json
     jsonCoords = json.dumps({"waypoints":waypointCoords})
