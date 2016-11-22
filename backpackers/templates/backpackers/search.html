@@ -43,7 +43,7 @@
 
 {% block js %}
 
-<script src="http://maps.google.com/maps/api/js?key=AIzaSyDwmcXaEzXe2oAt48NuaJx_Iqdlo6pT2Ys" type="text/javascript"></script>
+<script src="http://maps.google.com/maps/api/js?key=AIzaSyC7VcV2WkEBe7IfQoDQsq4RtU9xEF1EdaE" type="text/javascript"></script>
 <script>
     var hotels = {{ hotels|safe }};
 
@@ -74,7 +74,7 @@
     }
 
     function displayInfos(data) {
-        alert("name : " + data.name + " - price: " + data.price)
+        alert("name : " + data.name + " - price: " + data.price + " {{ cur }}")
     }
 
 </script>

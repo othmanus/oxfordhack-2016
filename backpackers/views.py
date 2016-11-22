@@ -26,7 +26,7 @@ def search(request):
     # Google Map API
     # Search for the directions and divide it by steps
     # ==========================================================================
-    GOOGLE_API_KEY = 'AIzaSyAzKgY27NTR5LDPyR98AiCh39UcEWvFs7c'
+    GOOGLE_API_KEY = 'AIzaSyC7VcV2WkEBe7IfQoDQsq4RtU9xEF1EdaE'
 
     gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
 
@@ -249,6 +249,7 @@ def search(request):
         'mode': mode,
         'criteria': intervalType,
         'interval': interval,
+        'currency': cur,
         'stops': stops,
         # 'flight_direct': flight_direct,
         # 'flight_price': flight_price,
