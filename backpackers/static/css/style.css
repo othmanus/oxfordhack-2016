@@ -24,9 +24,25 @@ p.lead {
 }
 
 .btn#search {
-
     display: block;
     margin: 20px auto;
     border-radius: 0;
     width: 300px;
+}
+
+#stop-origin {
+    background-color: #8CC152;
+}
+
+#stop-destination {
+    background-color: #DA4453;
+}
+
+.footer-logo, .footer-nav {
+    height: auto;
+    width: 25%;
+}
+
+.footer-nav .nav-title#hotel-price {
+    font-size: 36px;
 }

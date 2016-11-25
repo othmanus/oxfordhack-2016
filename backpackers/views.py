@@ -26,7 +26,7 @@ def search(request):
     # Google Map API
     # Search for the directions and divide it by steps
     # ==========================================================================
-    GOOGLE_API_KEY = 'AIzaSyC7VcV2WkEBe7IfQoDQsq4RtU9xEF1EdaE'
+    GOOGLE_API_KEY = 'AIzaSyCLrrpO2bvQQcjOr13zBbAfX4fYU8q2MME'
 
     gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
 
@@ -43,7 +43,6 @@ def search(request):
 
     res = requests.get("https://maps.googleapis.com/maps/api/directions/json?origin="+origin+"&destination="+destination+"&mode="+mode+"&key="+GOOGLE_API_KEY)
     jsonOfRes = res.json()
-
 
     waypoints = []
     waypointCoords = []
@@ -84,6 +83,11 @@ def search(request):
         coordinates['lat'] = waypoints[point][u'start_location'][u'lat']
         coordinates['long'] = waypoints[point][u'start_location'][u'lng']
         coordinates['time'] = waypoints[point][u'duration'][u'value']
+        # Get stop name from Google Api
+        res1 = requests.get("https://maps.googleapis.com/maps/api/geocode/json?latlng="+str(waypoints[point][u'start_location'][u'lat'])+","+str(waypoints[point][u'start_location'][u'lng'])+"&key="+GOOGLE_API_KEY)
+        jsonOfRes1 = res1.json()
+        coordinates['name'] = jsonOfRes1[u'results'][1][u'formatted_address']
+
         waypointCoords.append(coordinates)
 
     # convert coordinates to json
@@ -167,18 +171,20 @@ def search(request):
     stops = []
 
     for point in range(len(parsedWaypoints)):
+
         lat = ("%.2f" % parsedWaypoints[point][u'lat'])
         lng = ("%.2f" % parsedWaypoints[point][u'long'])
+        time = ("%d" % parsedWaypoints[point][u'time'])
+        name = parsedWaypoints[point][u'name']
 
-
-        entityid=lat+","+lng+"-latlong" #input("Enter Location: ")
+        entityid=lat+","+lng+"-latlong"
         checkindate= depature_date
         checkoutdate= arrival_date
         guests = 1
         rooms = 1
 
-        URL= "http://partners.api.skyscanner.net/apiservices/hotels/liveprices/v2/UK/GBP/en-GB/{}/{}/{}/{}/{}?apiKey={}&pageSize=20"
-        res = requests.get(URL.format(entityid,checkindate,checkoutdate,guests,rooms,API))
+        URL= "http://partners.api.skyscanner.net/apiservices/hotels/liveprices/v2/UK/{}/en-GB/{}/{}/{}/{}/{}?apiKey={}&pageSize=20"
+        res = requests.get(URL.format(cur, entityid, checkindate, checkoutdate, guests, rooms, API))
 
         session = "http://partners.api.skyscanner.net" + res.headers['location']
 
@@ -186,11 +192,15 @@ def search(request):
         hs = filt["hotels"]
 
         hotels_hash = []
+        cheapestHotel = {}
+
         for hotel in hs:
             hotel_id = hotel['hotel_id']
             hotel_name = hotel['name']
             hotel_lat = hotel['latitude']
             hotel_lng = hotel['longitude']
+            hotel_address = hotel['address']
+            hotel_image = hotel['images'];
 
             # search for cheapest price
             hotel_prices = filt["hotels_prices"]
@@ -200,11 +210,32 @@ def search(request):
                 if id == hotel_id:
                     hotel_price = price["agent_prices"][0]["price_total"]
                     break
+            h = {
+                "id": hotel_id,
+                "name": hotel_name,
+                "lat": hotel_lat,
+                "lng": hotel_lng,
+                "price": hotel_price,
+                "address": hotel_address,
+                "image": hotel_image
+            }
 
-            hotels_hash.append([hotel_id, hotel_name, hotel_lat, hotel_lng, hotel_price])
+            hotels_hash.append(h);
 
+            if not cheapestHotel:
+                cheapestHotel = h
+            elif hotel_price < cheapestHotel['price']:
+                cheapestHotel = h
 
-        stops.append([lat, lng, len(hotels_hash)])
+        stops.append({
+            "stopId": str(lat)+str(lng),
+            "name": name,
+            "lat": lat,
+            "lng": lng,
+            "time": time,
+            "nbHotels": len(hotels_hash),
+            "cheapestHotel": cheapestHotel
+        })
 
         hotels.extend(hotels_hash)
         # URL= "http://partners.api.skyscanner.net/apiservices/hotels/liveprices/v2/UK/GBP/en-GB/{}/{}/{}/{}/{}?apiKey={}&pageSize=20"
@@ -239,18 +270,20 @@ def search(request):
     # Return the response
     # ==========================================================================
     hotels = json.dumps(hotels)
+    points = stops
     stops = json.dumps(stops)
 
     context = {
         'name': 'search',
-        'points': parsedWaypoints,
         'origin': origin,
         'destination': destination,
         'mode': mode,
         'criteria': intervalType,
+        'currency': cur,
         'interval': interval,
         'currency': cur,
         'stops': stops,
+        'points': points,
         # 'flight_direct': flight_direct,
         # 'flight_price': flight_price,
         # 'flight_airlines': flight_airlines,

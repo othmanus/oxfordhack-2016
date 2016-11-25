@@ -14,6 +14,12 @@ It also has a feature from long-distances driving, proposing the cheapest hotels
 # How we built it
 Using Skyscanner and google's API. Written in Python and integrated in Django. HTML, CSS and JavasScript for front end.
 
+## Installation
+- Install python and django framework (with pip)
+- Clone the repo `git clone https://github.com/othmanus/oxfordhack-2016`
+- Go to the root of the project and run the app `python manage.py runserver`
+- Go to the browser, the app should be running at the address `http://localhost:8000/backpackers`
+
 # What's next for BagPackers
 To keep improving on what we have built to make it better and simpler with more features. Also create a mobile app.
 

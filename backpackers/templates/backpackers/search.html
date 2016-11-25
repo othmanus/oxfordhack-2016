@@ -14,28 +14,48 @@
 <div class="container">
     <div class="row">
         <div class="col-md-3">
-            <h1>Bag'packers</h1>
+            <h1>BagPackers</h1>
             <hr>
             <div class="timeline">
                 <dl>
+                    <dt id="stop-origin">{{ origin }}</dt>
+
                     {% for point in points %}
-                    <dt data-lat="">{{ point.lat }}, {{ point.long }}</dt>
+                    <dt id="stop-{{ point.stopId }}">{{ point.name }}</dt>
                     <dd class="pos-right clearfix">
                         <div class="circ"></div>
-                        <div class="time"></div>
+                        <div class="time">{{ point.nbHotels }} places in the area</div>
                         <div class="events">
                             <div class="events-body">
-                                <h4 class="events-heading">Number of hotels:</h4>
-                                <p></p>
+                                <h4 class="events-heading">Best place:</h4>
+                                <p>
+                                    {{ point.cheapestHotel.name }} at {{ point.cheapestHotel.price }} {{ currency }}
+                                </p>
                             </div>
                         </div>
                     </dd>
                     {% endfor %}
+
+                    <dt id="stop-destination">{{ destination }}</dt>
                 </dl>
             </div>
         </div>
         <div class="col-md-9">
             <div id="map"></div>
+            <div class="footer">
+                <div class="container">
+                    <div class="clearfix">
+                        <div class="footer-logo"><a href="#" id="hotel-name"></a></div>
+                        <dl class="footer-nav">
+                            <dt class="nav-title" id="hotel-price"></dt>
+                            <dd class="nav-item" id="hotel-address"></dd>
+                        </dl>
+                        <dl class="footer-nav">
+                            <dt class="nav-title" id="hotel-image"></dt>
+                        </dl>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -43,39 +63,56 @@
 
 {% block js %}
 
-<script src="http://maps.google.com/maps/api/js?key=AIzaSyC7VcV2WkEBe7IfQoDQsq4RtU9xEF1EdaE" type="text/javascript"></script>
+<script src="http://maps.google.com/maps/api/js?key=AIzaSyCLrrpO2bvQQcjOr13zBbAfX4fYU8q2MME" type="text/javascript"></script>
 <script>
+    // Get all the hotels
     var hotels = {{ hotels|safe }};
 
     var locations = [];
     for (i = 0; i < hotels.length; i++) {
-        locations.push([hotels[i][1], hotels[i][2], hotels[i][3]])
+        locations.push([hotels[i].name, hotels[i].lat, hotels[i].lng])
     }
 
+    // Create the map
     var map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 3,
-        center: new google.maps.LatLng(hotels[0][3], hotels[0][2]),
+        zoom: 8,
+        center: new google.maps.LatLng(locations[0][1], locations[0][2]),
         mapTypeId: google.maps.MapTypeId.ROADMAP
     });
 
-    var infowindow = new google.maps.InfoWindow();
+    var geocoder = new google.maps.Geocoder;
+    var infowindow = new google.maps.InfoWindow;
 
     var marker, i;
 
+    // For each stop, mark all the hotels in the area
     for (i = 0; i < locations.length; i++) {
         marker = new google.maps.Marker({
             position: new google.maps.LatLng(locations[i][1], locations[i][2]),
             map: map,
-            customInfo: {name: hotels[i][1], price: hotels[i][4]}
+            customInfo: {
+                name: hotels[i].name,
+                price: hotels[i].price,
+                address: hotels[i].address,
+                image: hotels[i].image
+            }
         });
         google.maps.event.addListener(marker, 'click', function() {
             displayInfos(this.customInfo);
         });
     }
 
+    // Display info of the selected hotel
     function displayInfos(data) {
-        alert("name : " + data.name + " - price: " + data.price + " {{ cur }}")
+        $("#hotel-name").text(data.name);
+        $("#hotel-address").text(data.address);
+        $("#hotel-price").text(data.price + " {{ currency }}");
+        // d3ba47lalua02r.cloudfront.net/available/8615441/rmt.jpg
+        $("#hotel-image").empty();
+        $("#hotel-image").append('<img class="img-responsive" src="http://d3ba47lalua02r.cloudfront.net/available'+Object.keys(data.image)[0]+'rmt.jpg" >')
     }
+
+
 
 </script>
 {% endblock %}
